@@ -1,0 +1,152 @@
+What is prop drilling?
+Prop Drilling refers to the passsing down the data from parent components to nested child components through props.It is also called components chaining.Props drilling is used to pass several layers of nested components which needs the props,it passes through all the components which it deoesnot use to reach the needed components.
+
+In Prop Drilling, instead of passing the data to each child component directly, it passes through each level of the hierarchy of the components to reach the desired child components for the props thats why prop driiling is used. 
+
+Let's illustrate this with an example:
+
+// ParentComponent.js
+import React from 'react';
+import ChildComponent from './ChildComponent';
+
+function ParentComponent() {
+  const data = 'Hello from Parent';
+
+  return (
+    <div>
+      <ChildComponent data={data} />
+    </div>
+  );
+}
+
+export default ParentComponent;
+// ChildComponent.js
+import React from 'react';
+import GrandchildComponent from './GrandchildComponent';
+
+function ChildComponent(props) {
+  return (
+    <div>
+      <GrandchildComponent data={props.data} />
+    </div>
+  );
+}
+
+export default ChildComponent;
+// GrandchildComponent.js
+import React from 'react';
+
+function GrandchildComponent(props) {
+  return <div>{props.data}</div>;
+}
+
+export default GrandchildComponent;
+
+In this example, GrandchildComponent needs to access the data prop, but ParentComponent and ChildComponent do not use it. However, the data prop must still be passed through them.
+
+# Challenges of Prop Drilling
+
+!. Complexity and Boilerplate Code
+Prop driiling can lead to increased complexity and boilerplate code as it makes difficult to maintain in large components tree. As the components get deeper it makes more complexity and difficulty to maintain the flow of props.
+
+// Example of Prop Drilling
+const ParentComponent = () => { //Arrow function (=>)
+    const data = fetchData(); // Assume fetching data from an API
+    return (
+        <ChildComponentA data={data} />
+    );
+};
+
+const ChildComponentA = ({ data }) => {
+    return (
+        <ChildComponentB data={data} />
+    );
+};
+
+const ChildComponentB = ({ data }) => {
+    return (
+        <ChildComponentC data={data} />
+    );
+};
+
+// This continues...
+
+2. Component Coupling
+Prop Drilling can tightly couple components together, which makes its harder and difficult to refactor and restructure the code without affecting the other components and it decreased the maintainability and flexibilty.
+
+3. Performance Overhead
+passing props through multiple level of components can lead to performance overhead,mainly during when the components contain large amount of data. It leads to re-rendering each time the props is changed and needs to pass through each intermediatery components which leads ro unnecessary re-renders and performance loss.
+
+# How to Overcome Prop Drilling
+There are several techniques to overcome prop drilling in React.js:
+
+1.Context API
+React's Context API allows you to share the data across the components without passing the props through each level of hierarchy. Context provides a way to pass data through component tree without passing props down manually at every level.
+
+2. State Management Libraries
+ Using state management libraries like Redux or MobX can help centralize and manage application state, reducing the need for prop drilling.
+
+3.Higher-Order Components (HOCs)
+HOCs are functions that accept a component as input and return a new component with additional props or functionality. They can be used to inject props without directly passing them down through every intermediate component.
+
+4.Render Props
+Render props is a technique for sharing code between react components using prop whose value is a function. This allows components to share code without resorting to prop drilling.
+
+Let's refactor the previous example using the Context API:
+
+// MyContext.js
+import React from 'react';
+
+const MyContext = React.createContext();
+
+export default MyContext;
+// ParentComponent.js
+import React from 'react';
+import ChildComponent from './ChildComponent';
+import MyContext from './MyContext';
+
+function ParentComponent() {
+  const data = 'Hello from Parent';
+
+  return (
+    <MyContext.Provider value={data}>
+      <ChildComponent />
+    </MyContext.Provider>
+  );
+}
+
+export default ParentComponent;
+// ChildComponent.js
+import React from 'react';
+import GrandchildComponent from './GrandchildComponent';
+import MyContext from './MyContext';
+
+function ChildComponent() {
+  return (
+    <MyContext.Consumer>
+       <GrandchildComponent data={data} />
+    </MyContext.Consumer>
+  );
+}
+
+export default ChildComponent;
+// GrandchildComponent.js
+import React from 'react';
+import MyContext from './MyContext';
+
+function GrandchildComponent() {
+  return (
+    <MyContext.Consumer>
+      <div>{data}</div>
+    </MyContext.Consumer>
+  );
+}
+
+export default GrandchildComponent;
+
+In this refactored example, we've used the Context API to provide and consume the data prop without having to pass it down through every component manually.
+
+Conclusion
+Prop drilling may seem like a convenient shortcut initially, but its consequences can hinder the maintainability of your code.
+
+By using techniques like Context API, state management libraries, or the power of render props, you'll empower yourself to build clean, maintainable, and scalable React applications.
